@@ -1,0 +1,45 @@
+{% extends "blogapp/base.html" %}
+{% loadblog_tags %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+ {% with comments.count as total_comments %}
+    <h2>{{ total_comments }} comment{{ total_comments|pluralize }}</h2>
+ {% endwith %}
+    <h1>{{ post.title }}</h1>
+    <p class="date">Пост {{ post.publish }} написан автором {{ post.author }}</p>
+ {{ post.body|markdown }}
+    <p>
+    <a href="{% url 'blogapp:post_share' post.id %}">Поделиться статьей</a>
+   </p>
+
+    <h2>Похожие статьи</h2>
+    {% for post in similar_posts %}
+        <p>
+            <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+        </p>
+    {% empty %}
+        Пока что нету похожих статей.
+    {% endfor %}
+
+
+ {% for comment in comments %}
+   <div class="comment">
+   <p class="info">Комментарий {{ forloop.counter }} от {{ comment.name }}{{ comment.created }}</p>
+      {{ comment.body|linebreaks }}
+  </div>
+ {% empty %}
+  <p>Пока что нет комментариев.</p>
+ {% endfor %}
+
+ {% if new_comment %}
+      <h2>Your comment has been added.</h2>
+ {% else %}
+      <h2>Add a new comment</h2>
+      <form action="." method="post">
+           {{ comment_form.as_p }}
+           {% csrf_token %}
+      <p><input type="submit" value="Add comment"></p>
+      </form>
+ {% endif %}
+
+{% endblock %}
